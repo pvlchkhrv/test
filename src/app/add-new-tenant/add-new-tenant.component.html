@@ -1,0 +1,39 @@
+<div class="close-dialog-btn"><mat-icon>close</mat-icon></div>
+<h2 mat-dialog-title class="dialog-title">Add New Tenant</h2>
+<div mat-dialog-content class="dialog-content">
+  <form [formGroup]="addNewTenantForm">
+    
+    <div class="control-wrapper">
+      <mat-form-field class="control" appearance="outline">
+        <label class="required">Tenant Name</label>
+        <input type="text" matInput formControlName="tenantName" />
+        <mat-error>Tenant name is required</mat-error>
+        <mat-error>Tenant name should be unique</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="control-wrapper">
+      <label>Enabled Apps</label>
+      <ng-container formArrayName="enabledApps">
+        <div *ngFor="let item of checkboxData; let i=index">
+          <label>
+            <mat-checkbox 
+              value="{{ item.value }}"
+              (change)="onCheckboxChange($event)"
+              >{{ item.name }}</mat-checkbox>
+          </label>
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="control-wrapper">
+      <mat-form-field class="control" appearance="outline">
+        <label class="required">Site Name</label>
+        <input type="text" matInput formControlName="siteName" />
+        <mat-error>Tenant name is required</mat-error>
+        <mat-error>Tenant name should be unique</mat-error>
+      </mat-form-field>
+    </div>
+    <button mat-button color="primary" (click)="onSubmit()">Primary</button>
+  </form>
+</div>

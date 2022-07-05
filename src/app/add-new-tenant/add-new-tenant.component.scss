@@ -1,0 +1,4 @@
+label.required:after, p.required:after {
+    content: ' *';
+    display: inline;
+}
