@@ -4,11 +4,12 @@
   <form [formGroup]="addNewTenantForm">
     
     <div class="control-wrapper">
+      <label class="required">Tenant Name</label>
       <mat-form-field class="control" appearance="outline">
-        <label class="required">Tenant Name</label>
-        <input type="text" matInput formControlName="tenantName" />
-        <mat-error>Tenant name is required</mat-error>
-        <mat-error>Tenant name should be unique</mat-error>
+        <input type="text" #tenantName matInput formControlName="tenantName" placeholder="Enter tenant name" maxlength="100"/>
+        <mat-hint align="end"> {{ tenantName.value.length }}/100</mat-hint>
+        <mat-error *ngIf="f['tenantName'].hasError('required')">Tenant Name is required</mat-error>
+          <!-- <mat-error>Tenant name should be unique</mat-error> -->
       </mat-form-field>
     </div>
 
@@ -20,19 +21,45 @@
             <mat-checkbox 
               value="{{ item.value }}"
               (change)="onCheckboxChange($event)"
-              >{{ item.name }}</mat-checkbox>
+              >{{ item.name }}
+            </mat-checkbox>
           </label>
         </div>
+      </ng-container>
+      <mat-error *ngIf="f['enabledApps'].hasError('lessThanRequired')">Enabled Apps is required. At least one application should be selected</mat-error>
+    </div>
+
+    <div class="control-wrapper">
+      <label class="required">Site Name</label>
+      <mat-form-field class="control" appearance="outline">
+        <input type="text" #siteName matInput formControlName="siteName" placeholder="Enter site name" maxlength="100"/>
+        <mat-hint align="end"> {{ siteName.value.length }}/100</mat-hint>
+        <mat-error *ngIf="f['siteName'].hasError('required')">Site Name is required</mat-error>
+        <mat-error *ngIf="f['siteName'].hasError('pattern')">Allowed characters: A-Z, a-z, 0-9</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="urls">
+      <label>Direct site URLs</label>
+      <ng-container >
+          <div>https://{{siteName.value || 'sitename'}}.landing.com</div>
+          <div>https://{{siteName.value || 'sitename'}}.tenantmanagement.com</div>
+          <div>https://{{siteName.value || 'sitename'}}.usermanagement.com</div>
+          <div *ngIf="enabledAppsForSpendConnect.contracts">https://{{siteName.value || 'sitename'}}.contracts.com</div>
+          <div *ngIf="enabledAppsForSpendConnect.requests">https://{{siteName.value || 'sitename'}}.requests.com</div>
+          <div *ngIf="enabledAppsForSpendConnect.both">https://{{siteName.value || 'sitename'}}.spendconnect.com</div>
       </ng-container>
     </div>
 
     <div class="control-wrapper">
-      <mat-form-field class="control" appearance="outline">
-        <label class="required">Site Name</label>
-        <input type="text" matInput formControlName="siteName" />
-        <mat-error>Tenant name is required</mat-error>
-        <mat-error>Tenant name should be unique</mat-error>
-      </mat-form-field>
+      <label>Login Type</label>
+        <mat-radio-group aria-label="Select an option" formControlName="loginType">
+          <mat-radio-button 
+            *ngFor="let item of loginTypeRadioData;" 
+            [value]="item.value"
+            [disabled]="item.disabled"
+            >{{ item.name }}</mat-radio-button>
+        </mat-radio-group>
     </div>
     <button mat-button color="primary" (click)="onSubmit()">Primary</button>
   </form>

@@ -11,6 +11,7 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatInputModule } from "@angular/material/input";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatButtonModule } from "@angular/material/button";
+import { MatRadioModule } from "@angular/material/radio";
 
 @NgModule({
   declarations: [AppComponent, AddNewTenantComponent],
@@ -25,6 +26,7 @@ import { MatButtonModule } from "@angular/material/button";
     MatCheckboxModule,
     MatFormFieldModule,
     MatButtonModule,
+    MatRadioModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

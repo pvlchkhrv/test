@@ -1,12 +1,16 @@
 import { Component, OnInit } from "@angular/core";
 import {
   AbstractControl,
+  AsyncValidatorFn,
   FormArray,
   FormBuilder,
   FormGroup,
+  ValidationErrors,
+  ValidatorFn,
   Validators,
 } from "@angular/forms";
 import { MatCheckboxChange } from "@angular/material/checkbox";
+import { map } from "rxjs/operators";
 
 // enabledApps: [0, -- LendingApp
 //   1, -- SpendConnectApp
@@ -17,7 +21,7 @@ import { MatCheckboxChange } from "@angular/material/checkbox";
 // loginType: 0, -- Password
 // 1  -- SSO
 
-enum Applications {
+enum ApplicationCode {
   LendingApp = 0,
   SpendConnectApp = 1,
   ContractApp = 2,
@@ -31,17 +35,26 @@ enum LoginType {
   SSO = 1,
 }
 
+type CheckEnabledAppOptionsType = "contracts" | "requests" | "both";
+
 interface INewTenant {
   tenantName: string;
   siteName: string;
   connectionString: string;
-  enabledApps: [Applications];
+  enabledApps: [ApplicationCode];
   loginType: 0;
 }
 
 interface ICheckboxData {
   name: string;
-  value: Applications;
+  value: ApplicationCode;
+}
+
+interface IRadioData {
+  name: string;
+  value: LoginType;
+  checked: boolean;
+  disabled: boolean;
 }
 
 @Component({
@@ -52,42 +65,172 @@ interface ICheckboxData {
 export class AddNewTenantComponent implements OnInit {
   public addNewTenantForm!: FormGroup;
   public checkboxData: ICheckboxData[] = [
-    { name: "Contracts", value: Applications.ContractApp },
-    { name: "Requests", value: Applications.RequestApp },
-    { name: "TenantManagement", value: Applications.TenantManagementApp },
-    { name: "UserManagementApp", value: Applications.UserManagementApp },
+    { name: "Contracts", value: ApplicationCode.ContractApp },
+    { name: "Requests", value: ApplicationCode.RequestApp },
+    { name: "TenantManagement", value: ApplicationCode.TenantManagementApp },
+    { name: "UserManagementApp", value: ApplicationCode.UserManagementApp },
   ];
+  public loginTypeRadioData: IRadioData[] = [
+    {
+      name: "Password",
+      value: LoginType.Password,
+      checked: true,
+      disabled: false,
+    },
+    {
+      name: "SSO",
+      value: LoginType.SSO,
+      checked: false,
+      disabled: true,
+    },
+  ];
+  public enabledAppsForSpendConnect = {
+    contracts: false,
+    requests: false,
+    both: false,
+  };
 
   constructor(private readonly fb: FormBuilder) {}
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.addNewTenantForm = this.fb.group({
-      tenantName: [null, [Validators.required, Validators.maxLength(100)]],
-      siteName: [this.addNewTenantForm.get("tenantName")?.valueChanges],
+      tenantName: [
+        null,
+        {
+          validators: [Validators.required],
+          asyncValidators: [],
+          updateOn: "blur",
+        },
+      ],
+      siteName: [
+        null,
+        {
+          validators: [
+            Validators.required,
+            Validators.pattern("^[a-zA-Z0-9]*$"),
+          ],
+          asyncValidators: [],
+        },
+      ],
       connectionString: [null],
-      enabledApps: this.fb.array([], Validators.required),
+      enabledApps: this.fb.array([], {
+        validators: [this.checkboxesToBeCheckedValidator(1)],
+        updateOn: "blur",
+      }),
+      loginType: [LoginType.Password],
     });
+
+    this.addNewTenantForm.get("tenantName")?.valueChanges.subscribe((value) => {
+      this.addNewTenantForm
+        .get("siteName")
+        ?.patchValue(this.manageTenantName(value));
+    });
+
+    this.addNewTenantForm.statusChanges.subscribe((value) =>
+      console.log(value)
+    );
   }
 
-  onCheckboxChange(e: MatCheckboxChange) {
-    const checkArray: FormArray = this.addNewTenantForm.get(
-      "enabledApps"
-    ) as FormArray;
+  public get f(): { [key: string]: AbstractControl } {
+    return this.addNewTenantForm.controls;
+  }
+
+  public onCheckboxChange(e: MatCheckboxChange) {
     if (e.checked) {
-      checkArray.push(this.fb.control(e.source.value));
+      this.checkArray.push(this.fb.control(e.source.value));
     } else {
       let i = 0;
-      checkArray.controls.forEach((item: AbstractControl) => {
+      this.checkArray.controls.forEach((item: AbstractControl) => {
         if (item.value === e.source.value) {
-          checkArray.removeAt(i);
+          this.checkArray.removeAt(i);
           return;
         }
         i++;
       });
     }
+    this.enabledAppsForSpendConnect.contracts =
+      this.checkContractsOrRequestsAppsAreEnabled("contracts");
+    this.enabledAppsForSpendConnect.requests =
+      this.checkContractsOrRequestsAppsAreEnabled("requests");
+    this.enabledAppsForSpendConnect.both =
+      this.checkContractsOrRequestsAppsAreEnabled("both");
   }
 
-  onSubmit() {
+  public onSubmit() {
     console.log(this.addNewTenantForm.value);
+  }
+
+  private checkContractsOrRequestsAppsAreEnabled(
+    option: CheckEnabledAppOptionsType
+  ): boolean {
+    switch (option) {
+      case "contracts":
+        console.log(this.isAppEnabled(ApplicationCode.ContractApp));
+        return this.isAppEnabled(ApplicationCode.ContractApp);
+      case "requests":
+        return this.isAppEnabled(ApplicationCode.RequestApp);
+      case "both":
+        return (
+          this.isAppEnabled(ApplicationCode.ContractApp) &&
+          this.isAppEnabled(ApplicationCode.RequestApp)
+        );
+    }
+  }
+
+  private isAppEnabled(appCode: ApplicationCode): boolean {
+    let result = false;
+    this.checkArray.controls.forEach((control: AbstractControl) => {
+      if (+control.value === appCode) {
+        result = true;
+      }
+    });
+    return result;
+  }
+
+  private manageTenantName(tenantName: string): string {
+    return tenantName.trim().replace(/[^a-zA-Z0-9]/g, "");
+  }
+
+  private tenantExistsAsyncValidator(tenantsService: any): AsyncValidatorFn {
+    return (control: AbstractControl) => {
+      return tenantsService
+        .findTenantByName(control.value)
+        .pipe(map((tenant) => (tenant ? { tenantExists: true } : null)));
+    };
+  }
+
+  private get checkArray(): FormArray {
+    return this.addNewTenantForm.get("enabledApps") as FormArray;
+  }
+
+  private checkboxesToBeCheckedValidator(minRequired: number = 1): ValidatorFn {
+    return (formArray: AbstractControl): ValidationErrors | null => {
+      let checked = 0;
+
+      (formArray as FormArray).controls.forEach((control) => {
+        if (control.value) {
+          checked++;
+          formArray.markAsTouched();
+        }
+      });
+
+      if (checked < minRequired && formArray.touched) {
+        return {
+          lessThanRequired: true,
+        };
+      }
+      return null;
+    };
+  }
+
+  // private validateForm(): void {
+  //   this.addNewTenantForm.
+  // }
+
+  // formhelper
+  private isControlInvalid(controlName: string): boolean {
+    let control = this.addNewTenantForm.get(controlName);
+    let result = control!.invalid && control!.touched;
+    return result;
   }
 }
