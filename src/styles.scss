@@ -2,3 +2,43 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+// .dialog-header {
+//     display: flex;
+//     justify-content: space-between;
+//     align-items: center;
+//     height: 64px;
+//     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14);
+// }
+
+// // .mat-dialog-container {
+// // 	padding: 0 24px !important;
+// //     position: relative;
+// // }
+
+// .mat-dialog-content {
+// 	overflow-y: hidden;
+// }
+
+// .mat-dialog-actions {
+// 	height: 100px;
+// }
+
+.form-dialog {
+	.mat-dialog-container {
+		overflow: hidden;
+		padding: 0px;
+	}
+	.dialog-header {
+		box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14);
+	}
+	.mat-dialog-content {
+		
+	}
+
+	.mat-dialog-actions {
+		height: 76px;
+		box-shadow: 0px -2px 4px rgba(0, 0, 0, 0.14);
+	}
+
+}

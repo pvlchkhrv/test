@@ -1,5 +1,45 @@
-label.required:after, p.required:after {
-    content: ' *';
-    display: inline;
-    color: red;
-}
+// label.required:after, p.required:after {
+//     content: ' *';
+//     display: inline;
+//     color: red;
+// }
+
+// .dialog-header {
+//     display: flex;
+//     justify-content: space-between;
+//     align-items: center;
+//     height: 64px;
+//     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14);
+// }
+
+// .dialog-footer {
+//     height: 76px;
+//     display: flex;
+//     justify-content: flex-end;
+//     align-items: center;
+//     box-shadow: 0px -2px 4px rgba(0, 0, 0, 0.14);
+// }
+
+// .mat-dialog-content {
+//     &.mat-dialog-content {
+//         overflow: initial;
+//     }
+// }
+
+// .mat-dialog-actions {
+//     justify-content: space-between;
+//     padding-bottom: 0;
+//     margin-bottom: 0;
+// }
+
+// .control-wrapper {
+//     display: flex;
+//     width: 100%;
+//     flex-direction: column;
+//     // margin-bottom: 7px;
+// }
+
+// .close-dialog-btn {
+//     cursor: pointer;
+// }
+

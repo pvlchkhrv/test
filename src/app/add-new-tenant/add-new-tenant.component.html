@@ -1,11 +1,13 @@
-<div class="close-dialog-btn"><mat-icon>close</mat-icon></div>
-<h2 mat-dialog-title class="dialog-title">Add New Tenant</h2>
-<div mat-dialog-content class="dialog-content">
+<div class="dialog-header">
+  <h1 mat-dialog-title class="dialog-title">{{ isEdit ? 'Edit Tenant' : 'Add New Tenant'   }}</h1>
+  <div class="close-dialog-btn" (click)="closeDialog()"><mat-icon>close</mat-icon></div>
+</div>
+<mat-dialog-content class="dialog-content">
   <form [formGroup]="addNewTenantForm">
     
     <div class="control-wrapper">
       <label class="required">Tenant Name</label>
-      <mat-form-field class="control" appearance="outline">
+      <mat-form-field class="control" appearance="outline" floatLabel="never">
         <input type="text" #tenantName matInput formControlName="tenantName" placeholder="Enter tenant name" maxlength="100"/>
         <mat-hint align="end"> {{ tenantName.value.length }}/100</mat-hint>
         <mat-error *ngIf="f['tenantName'].hasError('required')">Tenant Name is required</mat-error>
@@ -61,6 +63,9 @@
             >{{ item.name }}</mat-radio-button>
         </mat-radio-group>
     </div>
-    <button mat-button color="primary" (click)="onSubmit()">Primary</button>
   </form>
-</div>
+</mat-dialog-content>
+<mat-dialog-actions align="end" class="dialog-footer">
+  <button class="btn" mat-button color="secondary" mat-dialog-close>Cancel</button>
+  <button class="btn" mat-button  color="primary" (click)="onSubmit()">Save</button>
+</mat-dialog-actions>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, Inject, OnInit } from "@angular/core";
 import {
   AbstractControl,
   AsyncValidatorFn,
@@ -10,6 +10,7 @@ import {
   Validators,
 } from "@angular/forms";
 import { MatCheckboxChange } from "@angular/material/checkbox";
+import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { map } from "rxjs/operators";
 
 // enabledApps: [0, -- LendingApp
@@ -64,6 +65,7 @@ interface IRadioData {
 })
 export class AddNewTenantComponent implements OnInit {
   public addNewTenantForm!: FormGroup;
+  public tenantForEdit?: INewTenant;
   public checkboxData: ICheckboxData[] = [
     { name: "Contracts", value: ApplicationCode.ContractApp },
     { name: "Requests", value: ApplicationCode.RequestApp },
@@ -90,7 +92,15 @@ export class AddNewTenantComponent implements OnInit {
     both: false,
   };
 
-  constructor(private readonly fb: FormBuilder) {}
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public dialogData: any,
+    private readonly fb: FormBuilder,
+    private readonly dialogRef: MatDialogRef<AddNewTenantComponent>
+  ) {}
+
+  public get isEdit(): boolean {
+    return !!this.tenantForEdit;
+  }
 
   public ngOnInit(): void {
     this.addNewTenantForm = this.fb.group({
@@ -129,6 +139,8 @@ export class AddNewTenantComponent implements OnInit {
     this.addNewTenantForm.statusChanges.subscribe((value) =>
       console.log(value)
     );
+
+    this.dialogRef.addPanelClass("form-dialog");
   }
 
   public get f(): { [key: string]: AbstractControl } {
@@ -232,5 +244,10 @@ export class AddNewTenantComponent implements OnInit {
     let control = this.addNewTenantForm.get(controlName);
     let result = control!.invalid && control!.touched;
     return result;
+  }
+
+  public closeDialog(): void {
+    this.dialogRef.removePanelClass("form-dialog");
+    this.dialogRef.close();
   }
 }

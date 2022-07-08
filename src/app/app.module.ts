@@ -12,9 +12,15 @@ import { MatInputModule } from "@angular/material/input";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatButtonModule } from "@angular/material/button";
 import { MatRadioModule } from "@angular/material/radio";
+import {
+  MatDialogModule,
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+} from "@angular/material/dialog";
+import { DialogBodyComponent } from "./dialog-body/dialog-body.component";
 
 @NgModule({
-  declarations: [AppComponent, AddNewTenantComponent],
+  declarations: [AppComponent, AddNewTenantComponent, DialogBodyComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -27,8 +33,12 @@ import { MatRadioModule } from "@angular/material/radio";
     MatFormFieldModule,
     MatButtonModule,
     MatRadioModule,
+    MatDialogModule,
   ],
-  providers: [],
+  providers: [
+    { provide: MatDialogRef, useValue: {} },
+    { provide: MAT_DIALOG_DATA, useValue: { data: {} } },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
